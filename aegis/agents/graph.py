@@ -1,5 +1,6 @@
 from langgraph.graph import StateGraph
 from models.state import AegisState
+from agents.risk_agent import risk_agent
 
 
 def replay_stub(state: AegisState):
@@ -7,16 +8,10 @@ def replay_stub(state: AegisState):
     return state
 
 
-def risk_stub(state: AegisState):
-    state["risk_score"] = 0.5
-    state["risk_reasoning"] = "Mock reasoning"
-    return state
-
-
 builder = StateGraph(AegisState)
 
 builder.add_node("replay", replay_stub)
-builder.add_node("risk", risk_stub)
+builder.add_node("risk", risk_agent)
 
 builder.set_entry_point("replay")
 builder.add_edge("replay", "risk")
@@ -24,5 +19,8 @@ builder.add_edge("replay", "risk")
 graph = builder.compile()
 
 if __name__ == "__main__":
+    from dotenv import load_dotenv
+    load_dotenv("../.env")
+
     result = graph.invoke({"pr_id": "123"})
     print(result)
