@@ -34,11 +34,19 @@ async def consume():
 
             result = graph.invoke(payload)
 
-            logger.info(f"Pipeline result:")
-            logger.info(f"  PR ID:           {result.get('pr_id')}")
-            logger.info(f"  Latency Delta:   {result.get('replay_latency_delta')}")
-            logger.info(f"  Risk Score:      {result.get('risk_score')}")
-            logger.info(f"  Risk Reasoning:  {result.get('risk_reasoning')}")
+            logger.info("=" * 60)
+            logger.info(f"PIPELINE RESULT for {result.get('pr_id')}")
+            logger.info("=" * 60)
+            logger.info(f"  Replay Latency:    {result.get('replay_latency_delta')}s")
+            logger.info(f"  Similar Failures:  {result.get('similar_failures')}")
+            logger.info(f"  Risk Score:        {result.get('risk_score')}")
+            logger.info(f"  Risk Reasoning:    {result.get('risk_reasoning')}")
+            logger.info(f"  Anomaly Detected:  {result.get('anomaly_detected')}")
+            if result.get("anomaly_detected"):
+                logger.warning("  >>> ROLLBACK TRIGGERED <<<")
+            else:
+                logger.info("  >>> DEPLOYMENT APPROVED <<<")
+            logger.info("=" * 60)
     except KeyboardInterrupt:
         logger.info("Shutting down consumer...")
     finally:

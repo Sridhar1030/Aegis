@@ -22,13 +22,20 @@ Scoring guide:
 def risk_agent(state: AegisState) -> AegisState:
     client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
+    failures = state.get("similar_failures") or []
+    failures_text = "\n".join(f"  {i+1}. {f}" for i, f in enumerate(failures)) if failures else "  None found"
+
     user_prompt = f"""Analyze the following PR metrics and provide a risk assessment:
 
 - PR ID: {state.get("pr_id")}
+- Replay Latency (avg): {state.get("replay_latency_delta", "not available")}s
 - SonarQube Score: {state.get("sonar_score", "not available")}
-- Replay Latency Delta: {state.get("replay_latency_delta", "not available")}
 - Chaos Resilience Score: {state.get("chaos_resilience_score", "not available")}
 
+Similar past failures from deployment history:
+{failures_text}
+
+Consider the past failures carefully when scoring risk.
 Return your assessment as JSON with "score" (0-1) and "reasoning" fields."""
 
     response = client.chat.completions.create(
